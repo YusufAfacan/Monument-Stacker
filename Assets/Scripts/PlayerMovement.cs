@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private VariableJoystick joystick;
 
@@ -18,21 +18,6 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float RotationSpeed;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.GetComponent<Brick>())
-        {
-            
-
-
-            CollectBrick();
-        }
-    }
-
-    private void CollectBrick()
-    {
-        
-    }
 
 
     // Update is called once per frame

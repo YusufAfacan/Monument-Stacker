@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PlayerBrick
+  m_Name: PlayerDeploymentGroundIndicator
   m_Shader: {fileID: 4800000, guid: 4609c28b77ae6c04689a8ba2b2fccba7, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -34,7 +34,7 @@ Material:
     - _RampThreshold: 0.5
     - __dummy__: 0
     m_Colors:
-    - _Color: {r: 1, g: 0.8117647, b: 0, a: 1}
+    - _Color: {r: 1, g: 0.7490196, b: 0.50980395, a: 1}
     - _HColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SColor: {r: 1, g: 0.60766697, b: 0.3820755, a: 1}
+    - _SColor: {r: 1, g: 0.7490196, b: 0.50980395, a: 1}
   m_BuildTextureStacks: []

@@ -30,6 +30,7 @@ public class BrickSpawner : MonoBehaviour
 
                 GameObject initialBrick = Instantiate(brickPrefab, spawnPos, Quaternion.identity);
                 initialBrick.transform.SetParent(brickParent);
+                initialBrick.GetComponent<Brick>().isCollectible = true;
             }
         }
     }

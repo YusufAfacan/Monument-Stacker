@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 1529886741722181005}
   - component: {fileID: 1746112896}
   - component: {fileID: 1746112895}
+  - component: {fileID: 1746112897}
   m_Layer: 0
   m_Name: VoodooCustomCharacter
   m_TagString: Untagged
@@ -96,6 +97,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   freeStackPoint: {fileID: 1420432142}
+  stackedBricks: []
+  deployInterval: 0.1
+  jumpHeight: 1
+  gravity: -18
+  state: 0
 --- !u!136 &1746112895
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -110,6 +116,22 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &1746112897
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2614242618169837365}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &2614242616269703617
 PrefabInstance:
   m_ObjectHideFlags: 0
