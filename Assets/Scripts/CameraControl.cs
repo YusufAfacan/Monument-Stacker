@@ -1,30 +1,29 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows.WebCam;
 
 public class CameraControl : MonoBehaviour
 {
-    private Transform player;
-    private Vector3 offset;
+    private bool winShooted;
+    
+    public CinemachineVirtualCamera topDownCam;
+    public CinemachineVirtualCamera winCam;
 
-    private void Awake()
+    public void WinShoot(Transform winnerStacker)
     {
-        player = FindAnyObjectByType<PlayerMovement>().transform;
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        offset = transform.position - player.position;
-    }
+        if (!winShooted)
+        {
+            winCam.LookAt = winnerStacker;
 
-    private void LateUpdate()
-    {
-        transform.position = player.position + offset;
-    }
+            winCam.gameObject.SetActive(true);
+            topDownCam.gameObject.SetActive(false);
 
-    // Update is called once per frame
-    void Update()
-    {
+            winShooted = true;
+        }
         
     }
+
+
 }

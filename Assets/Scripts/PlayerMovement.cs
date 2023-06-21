@@ -1,47 +1,56 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private VariableJoystick joystick;
 
-    [SerializeField] private Animator animator;
-
-
-    private const string RUNNING = "Running";
-    private const string DYNIDLE = "DynIdle";
-
     [SerializeField]
     private float MovementSpeed;
     [SerializeField]
     private float RotationSpeed;
 
+    private Stacker stacker;
 
+    private CharacterAnimator characterAnimator;
 
-    // Update is called once per frame
+    private void Awake()
+    {
+        stacker = GetComponent<Stacker>();
+        characterAnimator = GetComponent<CharacterAnimator>();
+    }
+
     void Update()
     {
-        Vector3 inputVector = new(joystick.Horizontal, 0, joystick.Vertical);
-        inputVector = inputVector.normalized;
-
-        if (inputVector.magnitude > 0)
+        if (stacker.state == Stacker.State.Jumping)
         {
-            animator.SetTrigger(RUNNING);
+            return;
+        }
+        else if (stacker.state == Stacker.State.Flairing)
+        {
+            return;
         }
         else
         {
-            animator.SetTrigger(DYNIDLE);
+            Vector3 inputVector = new(joystick.Horizontal, 0, joystick.Vertical);
+
+            inputVector = inputVector.normalized;
+
+            Vector3 movementVector = MoveTowardTarget(inputVector);
+
+            RotateTowardMovementVector(movementVector);
+
+            if (inputVector.magnitude > 0)
+            {
+                characterAnimator.Running();
+            }
+            else
+            {
+                characterAnimator.Idling();
+            }
         }
 
-
-        Vector3 movementVector = MoveTowardTarget(inputVector);
-
-        RotateTowardMovementVector(movementVector);
     }
 
-    
 
     private Vector3 MoveTowardTarget(Vector3 targetVector)
     {
