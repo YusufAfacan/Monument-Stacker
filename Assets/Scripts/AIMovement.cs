@@ -5,8 +5,7 @@ using Random = UnityEngine.Random;
 
 public class AIMovement : MonoBehaviour
 {
-    
-    private BrickPool brickPool;
+
     private Stacker stacker;
     [SerializeField] private Transform deploymentArea;
     private Stacker[] stackersInGame;
@@ -23,13 +22,13 @@ public class AIMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        brickPool = FindObjectOfType<BrickPool>();
+
         stackersInGame = FindObjectsOfType<Stacker>();
 
         foreach (Stacker stacker in stackersInGame)
         {
             stacker.OnBrickCollected += Stacker_OnBrickCollected;
-            stacker.OnBrickSpawned += Stacker_OnBrickSpawned;
+            //stacker.OnBrickSpawned += Stacker_OnBrickSpawned;
         }
 
         stacker.state = Stacker.State.Free;
@@ -86,10 +85,10 @@ public class AIMovement : MonoBehaviour
             return;
         }
 
-        if (brickPool.BricksOnTheGround().Count == 0)
-        {
-            MoveToDeploy();
-        }
+        //if (brickPool.BricksOnTheGround().Count == 0)
+        //{
+        //    MoveToDeploy();
+        //}
 
         else if (stacker.collectedBricks.Count >= 7)
         {
@@ -98,7 +97,7 @@ public class AIMovement : MonoBehaviour
 
         else
         {
-            target = FindClosestBrick();
+            //target = FindClosestBrick();
         }
 
     }
@@ -116,25 +115,25 @@ public class AIMovement : MonoBehaviour
         target = stacker.deploymentGround.transform.position;
     }
 
-    private Vector3 FindClosestBrick()
-    {
-        Vector3 closestBrickPos = Vector3.zero;
+    //private Vector3 FindClosestBrick()
+    //{
+    //    Vector3 closestBrickPos = Vector3.zero;
 
-        float lowestDistance = Mathf.Infinity;
+    //    float lowestDistance = Mathf.Infinity;
 
-        foreach (Transform brickOnGround in brickPool.BricksOnTheGround())
-        {
+    //    foreach (Transform brickOnGround in brickPool.BricksOnTheGround())
+    //    {
             
-            float distance = Vector3.Distance(transform.position, brickOnGround.position);
+    //        float distance = Vector3.Distance(transform.position, brickOnGround.position);
 
-            if (distance < lowestDistance)
-            {
-                closestBrickPos = brickOnGround.position;
-                lowestDistance = distance;
-            }
+    //        if (distance < lowestDistance)
+    //        {
+    //            closestBrickPos = brickOnGround.position;
+    //            lowestDistance = distance;
+    //        }
 
-        }
+    //    }
 
-        return closestBrickPos;
-    }
+    //    return closestBrickPos;
+    //}
 }

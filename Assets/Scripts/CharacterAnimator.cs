@@ -10,6 +10,7 @@ public class CharacterAnimator : MonoBehaviour
     private const string JUMPING = "Jumping";
     private const string ISRUNNING = "isRunning";
     private const string FLAIR = "Flair";
+    private const string MINING = "Mining";
 
     private void Awake()
     {
@@ -34,5 +35,22 @@ public class CharacterAnimator : MonoBehaviour
     public void Flair()
     {
         animator.Play(FLAIR);
+    }
+
+    public void Mining()
+    {
+        //animator.Play(MINING);
+        animator.SetBool(MINING, true);
+    }
+
+    public void Fallen()
+    {
+        Debug.Log("fallen");
+    }
+
+    public void NotMining()
+    {
+        //animator.Play(MINING);
+        animator.SetBool(MINING, false);
     }
 }

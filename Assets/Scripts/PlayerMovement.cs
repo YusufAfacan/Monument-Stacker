@@ -12,9 +12,11 @@ public class PlayerMovement : MonoBehaviour
     private Stacker stacker;
 
     private CharacterAnimator characterAnimator;
+    private CharacterController characterController;
 
     private void Awake()
     {
+        characterController = GetComponent<CharacterController>();
         stacker = GetComponent<Stacker>();
         characterAnimator = GetComponent<CharacterAnimator>();
     }
@@ -25,46 +27,32 @@ public class PlayerMovement : MonoBehaviour
         {
             return;
         }
-        else if (stacker.state == Stacker.State.Flairing)
+        if (stacker.state == Stacker.State.Flairing)
         {
             return;
         }
+
+        Vector3 inputVector = new(joystick.Horizontal, 0, joystick.Vertical);
+
+        if(inputVector.magnitude > 0)
+        {
+            characterController.Move(MovementSpeed * Time.deltaTime * inputVector);
+
+            Vector3 pos = transform.position;
+            pos.y = 0;
+            transform.position = pos;
+
+            Quaternion toRotation = Quaternion.LookRotation(inputVector, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, RotationSpeed * Time.deltaTime);
+
+            characterAnimator.Running();
+        }
         else
         {
-            Vector3 inputVector = new(joystick.Horizontal, 0, joystick.Vertical);
-
-            inputVector = inputVector.normalized;
-
-            Vector3 movementVector = MoveTowardTarget(inputVector);
-
-            RotateTowardMovementVector(movementVector);
-
-            if (inputVector.magnitude > 0)
-            {
-                characterAnimator.Running();
-            }
-            else
-            {
-                characterAnimator.Idling();
-            }
+            characterAnimator.Idling();
         }
-
     }
 
 
-    private Vector3 MoveTowardTarget(Vector3 targetVector)
-    {
-        float speed = MovementSpeed * Time.deltaTime;
-
-        Vector3 targetPosition = transform.position + targetVector * speed;
-        transform.position = targetPosition;
-        return targetVector;
-    }
-
-    private void RotateTowardMovementVector(Vector3 movementDirection)
-    {
-        if (movementDirection.magnitude == 0) { return; }
-        var rotation = Quaternion.LookRotation(movementDirection);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, RotationSpeed);
-    }
+    
 }
