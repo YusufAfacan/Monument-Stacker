@@ -4,84 +4,56 @@ using UnityEngine;
 using DG.Tweening;
 using Random = UnityEngine.Random;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Stacker : MonoBehaviour
 {
-    public event EventHandler OnBrickCollected;
-    
     private ObjectPooler pooler;
-
-    public List<Transform> collectedBricks;
-    private bool canCollectBrick;
-
-    public Monument monument;
-    public DeploymentGround deploymentGround;
-    private Vector3 brickOffset = new Vector3(0,0.2f,0);
-
+    private GameObject ownedBomb;
+    private CameraControl cameraControl;
+    private Vector3 brickOffset = new Vector3(0, 0.2f, 0);
     private bool canDeploy;
-    public bool hasBomb;
-    public bool hasSuperJump;
+    private bool canCollectBrick;
     private const string BOMB = "Bomb";
     private const string SHOE = "Shoe";
-    private GameObject ownedBomb;
 
-
-    public GameObject bombFX;
-    public GameObject blastWaveFX;
-
-    private CharacterAnimator animator;
-    private CameraControl cameraControl;
     [SerializeField] private float miningInterval;
     [SerializeField] private float miningTime;
 
-    public List<Stacker> otherStackers;
+    public bool hasBomb;
+    public bool hasSuperJump;
+    public Monument monument;
+    public DeploymentGround deploymentGround;
+    public GameObject bombFX;
+    public GameObject blastWaveFX;
+    public List<Transform> collectedBricks;
+
+    [HideInInspector] public CharacterAnimator animator;
+    [HideInInspector] public List<Stacker> otherStackers;
+
+    public bool canMove;
+    public bool isMining;
+    public bool canMine;
 
     [HideInInspector] public enum State { Free, Deploying, Jumping, Flairing, Fallen};
     public State state;
 
     private void Awake()
     {
+        canMine = true;
+        canMove = true;
         canCollectBrick = true;
         canDeploy = true;
         state = State.Free;
         animator = GetComponent<CharacterAnimator>();
-
-
-
     }
     void Start()
     {
         miningTime = miningInterval;
-
         cameraControl = FindObjectOfType<CameraControl>();
         pooler = ObjectPooler.Instance;
     }
 
-    private void Update()
-    {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f))
-        {
-            if (hit.transform.GetComponent<Rock>() != null)
-            {
-                Rock rock = hit.transform.GetComponent<Rock>();
-                animator.Mining();
-                miningTime -= Time.deltaTime;
-                if (miningTime <= 0 && rock.isMineable)
-                {
-                    rock.Mine(this);
-                    miningTime = miningInterval;
-                }
-            }
-            
-        }
-
-        else
-        {
-            animator.NotMining();
-        }
-
-
-    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -90,13 +62,11 @@ public class Stacker : MonoBehaviour
             if (other.CompareTag(BOMB) && hasBomb == false)
             {
                 ownedBomb = other.gameObject;
-
                 ownedBomb.transform.SetParent(transform);
                 canCollectBrick = false;
                 ownedBomb.transform.SetLocalPositionAndRotation(LastCollectedBrickPos() + new Vector3(0, 0.5f, 0), Quaternion.identity);
                 hasBomb = true;
             }
-
         }
 
         if (other.CompareTag(SHOE) && hasSuperJump == false)
@@ -105,10 +75,6 @@ public class Stacker : MonoBehaviour
             other.gameObject.SetActive(false);
         }
 
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
         if (canCollectBrick)
         {
             if (other.GetComponent<Brick>())
@@ -122,9 +88,26 @@ public class Stacker : MonoBehaviour
                     touchedBrick.transform.SetParent(transform);
                     touchedBrick.transform.SetLocalPositionAndRotation(LastCollectedBrickPos(), Quaternion.identity);
                     touchedBrick.transform.localScale = Vector3.one;
-                    OnBrickCollected?.Invoke(this, EventArgs.Empty);
+                    pooler.BrickCollected();
                 }
             }
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.GetComponent<Rock>() != null)
+        {
+            Rock rock = other.GetComponent<Rock>();
+            animator.Mining();
+            isMining = true;
+            miningTime -= Time.deltaTime;
+            if (miningTime <= 0 && rock.isMineable)
+            {
+                rock.Mine(this);
+                miningTime = miningInterval;
+            }
+            
         }
 
         if (other.GetComponent<DeploymentGround>() == deploymentGround)
@@ -132,6 +115,10 @@ public class Stacker : MonoBehaviour
             if (collectedBricks.Count > 0 && canDeploy)
             {
                 DeployBrick();
+            }
+            else if (collectedBricks.Count == 0 && hasSuperJump)
+            {
+                JumpSequence();
             }
         }
 
@@ -145,7 +132,7 @@ public class Stacker : MonoBehaviour
 
                     ownedBomb.transform.SetParent(null);
                     Monument otherMonument = otherDeploymentGround.monument;
-                    Vector3 deploymentPos = otherMonument.bricksToBeActivated[otherMonument.nextBrickIndex - 1].transform.position;
+                    Vector3 deploymentPos = otherMonument.partsToBeActivated[otherMonument.nextBrickIndex - 1].transform.position;
                     Vector3 offset = new Vector3(0,0.5f,0);
                     ownedBomb.transform.DOJump(deploymentPos + offset, 2, 1, 0.4f).OnComplete(() =>
                     {
@@ -166,14 +153,21 @@ public class Stacker : MonoBehaviour
         }
     }
 
-    
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponent<Rock>())
+        {
+            isMining = false;
+            animator.NotMining();
+        }
+    }
 
     private void DeployBrick()
     {
         state = State.Deploying;
         canDeploy = false;
         Transform brickToBeDeployed = collectedBricks[^1];
-        Vector3 deployPosition = monument.bricksToBeActivated[monument.nextBrickIndex].transform.position;
+        Vector3 deployPosition = monument.partsToBeActivated[monument.nextBrickIndex].transform.position;
         brickToBeDeployed.SetParent(pooler.pools[0].parent);
         collectedBricks.Remove(brickToBeDeployed);
         brickToBeDeployed.DOJump(deployPosition, 2, 1, 0.4f).OnComplete(() => FinishDeployBrick(brickToBeDeployed)); 
@@ -190,35 +184,29 @@ public class Stacker : MonoBehaviour
         canDeploy = true;
         state = State.Free;
 
-        if (monument.nextBrickIndex >= monument.bricksToBeActivated.Count)
+        if (monument.nextBrickIndex >= monument.partsToBeActivated.Count)
         {
             Win();
             canDeploy = false;
-            return;
         }
-
-        if (collectedBricks.Count <= 0)
-        {
-            JumpSequence();
-        }
-
     }
 
     private void Win()
     {
+        canMine = false;
+        canMove = false;
         state = State.Flairing;
         transform.DOLookAt(Vector3.zero, 0.5f);
         animator.Flair();
-        cameraControl.WinShoot(transform);
+        //cameraControl.WinShoot(transform);
         collectedBricks.ForEach(brick => {brick.gameObject.SetActive(false);});
     }
 
     private void JumpSequence()
     {
-
         state = State.Jumping;
         Vector3 offset = new Vector3(0, 0.5f, 0);
-        Vector3 monumentPos = monument.bricksToBeActivated[monument.nextBrickIndex - 1].transform.position;
+        Vector3 monumentPos = monument.partsToBeActivated[monument.nextBrickIndex - 1].transform.position;
         Vector3 jumpPos = monumentPos + offset;
 
         transform.DOLookAt(monumentPos, 0.5f).OnComplete(() =>
@@ -236,14 +224,6 @@ public class Stacker : MonoBehaviour
                 });
             });
         });
-    }
-
-    public IEnumerator FallGround()
-    {
-        state = State.Fallen;
-        animator.Fallen();
-        yield return new WaitForSeconds(1f);
-        state = State.Free;
     }
 
     private void BlastGround()
@@ -266,32 +246,39 @@ public class Stacker : MonoBehaviour
 
         }
 
+        int brickSpawnAmount = 2;
 
-        int rockSpawnAmount = 1;
-
-        for (int i = 0; i < rockSpawnAmount; i++)
+        for (int i = 0; i < brickSpawnAmount; i++)
         {
             float x = Random.Range(-3, 3);
             float y = Random.Range(-3, 3);
             Vector3 jumpPos = new Vector3(x, 0.4f, y);
 
-            GameObject rockObj = pooler.SpawnFromPool("Rock", transform.position, Quaternion.identity);
-            Rock rock = rockObj.GetComponent<Rock>();
-            SphereCollider col = rockObj.GetComponent<SphereCollider>();
+            GameObject brickObj = pooler.SpawnFromPool("Brick", transform.position, Quaternion.identity);
 
-            rockObj.SetActive(true);
-            col.isTrigger = true;
-            rock.reservedBricks = 5;
-            rockObj.transform.DOJump(jumpPos, 1, 1, 0.5f).OnComplete(() =>
+            Brick brick = brickObj.GetComponent<Brick>();
+            brick.isCollectible = false;
+            BoxCollider col = brickObj.GetComponent<BoxCollider>();
+
+            brickObj.SetActive(true);
+            col.isTrigger = false;
+            
+            brickObj.transform.DOJump(jumpPos, 1, 1, 0.5f).OnComplete(() =>
             {
-                col.isTrigger = false;
-                rock.isMineable = true;
+                col.isTrigger = true;
+                brick.isCollectible = true;
+                pooler.BrickSpawned();
 
             });
         }
+    }
 
-        
-
+    public IEnumerator FallGround()
+    {
+        state = State.Fallen;
+        animator.Fallen();
+        yield return new WaitForSeconds(1f);
+        state = State.Free;
     }
 
     public Vector3 LastCollectedBrickPos()

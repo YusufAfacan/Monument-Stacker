@@ -1,139 +1,177 @@
 using DG.Tweening;
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public class AIMovement : MonoBehaviour
 {
-
+    private NavMeshAgent agent;
     private Stacker stacker;
-    [SerializeField] private Transform deploymentArea;
+    [SerializeField] private Vector3 deploymentArea;
     private Stacker[] stackersInGame;
     private Vector3 target;
-    private CharacterAnimator characterAnimator;
+    private CharacterAnimator animator;
     private float decisionDelay;
+    private ObjectPooler objectPooler;
+
 
     private void Awake()
     {
-        characterAnimator = GetComponent<CharacterAnimator>();
+        animator = GetComponent<CharacterAnimator>();
+        agent = GetComponent<NavMeshAgent>();
         stacker = GetComponent<Stacker>();
+        
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
+        objectPooler = ObjectPooler.Instance;
+        target = ClosestRock();
+        objectPooler.OnRockMined += ObjectPooler_OnRockMined;
+        objectPooler.OnRockSpawned += ObjectPooler_OnRockSpawned;
+        objectPooler.OnBrickSpawned += ObjectPooler_OnBrickSpawned;
+        objectPooler.OnBrickCollected += ObjectPooler_OnBrickCollected;
+        
+    }
 
-        stackersInGame = FindObjectsOfType<Stacker>();
-
-        foreach (Stacker stacker in stackersInGame)
+    private void ObjectPooler_OnBrickCollected(object sender, EventArgs e)
+    {
+        if(stacker.collectedBricks.Count > 10)
         {
-            stacker.OnBrickCollected += Stacker_OnBrickCollected;
-            //stacker.OnBrickSpawned += Stacker_OnBrickSpawned;
+            target = deploymentArea;
+            
+
+
         }
 
-        stacker.state = Stacker.State.Free;
+        else if (ClosestBrick() != null && Vector3.Distance(transform.position, ClosestBrick()) <= 1f)
+        {
+            target = ClosestBrick();
 
-        MoveToClosestBrick();
+
+        }
+        else
+        {
+            target = ClosestRock();
+
+
+        }
+    }
+
+    private void ObjectPooler_OnBrickSpawned(object sender, EventArgs e)
+    {
+        if (Vector3.Distance(transform.position, ClosestBrick()) <= 1f)
+        {
+            target = ClosestBrick();
+
+        }
+
+    }
+
+    private void ObjectPooler_OnRockSpawned(object sender, EventArgs e)
+    {
+        target = ClosestRock();
+
+
+    }
+
+    private void ObjectPooler_OnRockMined(object sender, EventArgs e)
+    {
+        if (stacker.collectedBricks.Count > 10)
+        {
+            target = deploymentArea;
+
+
+        }
+        else
+        {
+            target = ClosestRock();
+
+
+        }
+
+        
     }
 
     private void Update()
     {
-        if (stacker.state == Stacker.State.Jumping)
+        if (!agent.pathPending)
         {
-            return;
+            if (agent.remainingDistance <= agent.stoppingDistance)
+            {
+                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                {
+                    animator.NotRunning();
+                }
+            }
+        }
+        if (stacker.canMove)
+        {
+            agent.SetDestination(target);
+        }
+        if(!stacker.canMove)
+        {
+            agent.isStopped = true;
         }
 
-        if (stacker.state == Stacker.State.Flairing)
+
+        if (stacker.canMove && !stacker.isMining)
         {
-            return;
+            animator.Running();
         }
 
-        if (stacker.state == Stacker.State.Free)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, target, 5 * Time.deltaTime);
-            transform.DOLookAt(target, 0.5f);
-            characterAnimator.Running();
-        }
-
-        else
-        {
-            characterAnimator.Idling();
-        }
     }
 
-    private void Stacker_OnBrickSpawned(object sender, EventArgs e)
+    private Vector3 ClosestRock()
     {
-        decisionDelay = Random.Range(0.4f, 0.6f);
-        Invoke(nameof(MoveToClosestBrick), decisionDelay);
+        Rock[] rocks = FindObjectsOfType<Rock>();
+
+        if( rocks.Length == 0 )
+        {
+            return new Vector3( Random.Range(-3,3), 0, Random.Range(-3,3));
+        }
+
+        Rock closestRock = null;
+
+        float distance = Mathf.Infinity;
+
+        foreach (Rock rock in rocks)
+        {
+            if (Vector3.Distance(transform.position, rock.transform.position) <= distance)
+            {
+                distance = Vector3.Distance(transform.position, rock.transform.position);
+                closestRock = rock;
+            }
+
+        }
+
+        return closestRock.transform.position;
+
     }
 
-    private void Stacker_OnBrickCollected(object sender, EventArgs e)
+    private Vector3 ClosestBrick()
     {
-        decisionDelay = Random.Range(0.4f, 0.6f);
-        Invoke(nameof(MoveToClosestBrick), decisionDelay);
+        Brick[] bricks = FindObjectsOfType<Brick>();
+
+        if (bricks.Length == 0)
+        {
+            return new Vector3(Random.Range(-3, 3), 0, Random.Range(-3, 3));
+        }
+
+        Brick closestBrick = null;
+
+        float distance = Mathf.Infinity;
+
+        foreach (Brick brick in bricks)
+        {
+            if (Vector3.Distance(transform.position, brick.transform.position) <= distance)
+            {
+                distance = Vector3.Distance(transform.position, brick.transform.position);
+                closestBrick = brick;
+            }
+        }
+
+        return closestBrick.transform.position;
     }
-
-    private void MoveToClosestBrick()
-    {
-        if (stacker.state == Stacker.State.Jumping)
-        {
-            return;
-        }
-
-        if (stacker.state == Stacker.State.Flairing)
-        {
-            return;
-        }
-
-        //if (brickPool.BricksOnTheGround().Count == 0)
-        //{
-        //    MoveToDeploy();
-        //}
-
-        else if (stacker.collectedBricks.Count >= 7)
-        {
-            MoveToDeploy();
-        }
-
-        else
-        {
-            //target = FindClosestBrick();
-        }
-
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.GetComponent<DeploymentGround>() == stacker.deploymentGround)
-        {
-            characterAnimator.Idling();
-        }
-    }
-
-    private void MoveToDeploy()
-    {
-        target = stacker.deploymentGround.transform.position;
-    }
-
-    //private Vector3 FindClosestBrick()
-    //{
-    //    Vector3 closestBrickPos = Vector3.zero;
-
-    //    float lowestDistance = Mathf.Infinity;
-
-    //    foreach (Transform brickOnGround in brickPool.BricksOnTheGround())
-    //    {
-            
-    //        float distance = Vector3.Distance(transform.position, brickOnGround.position);
-
-    //        if (distance < lowestDistance)
-    //        {
-    //            closestBrickPos = brickOnGround.position;
-    //            lowestDistance = distance;
-    //        }
-
-    //    }
-
-    //    return closestBrickPos;
-    //}
 }

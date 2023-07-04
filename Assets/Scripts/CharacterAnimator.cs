@@ -22,7 +22,7 @@ public class CharacterAnimator : MonoBehaviour
         animator.SetBool(ISRUNNING, true);
     }
 
-    public void Idling()
+    public void NotRunning()
     {
         animator.SetBool(ISRUNNING, false);
     }
@@ -39,7 +39,6 @@ public class CharacterAnimator : MonoBehaviour
 
     public void Mining()
     {
-        //animator.Play(MINING);
         animator.SetBool(MINING, true);
     }
 
@@ -50,7 +49,6 @@ public class CharacterAnimator : MonoBehaviour
 
     public void NotMining()
     {
-        //animator.Play(MINING);
         animator.SetBool(MINING, false);
     }
 }

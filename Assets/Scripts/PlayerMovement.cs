@@ -11,14 +11,14 @@ public class PlayerMovement : MonoBehaviour
 
     private Stacker stacker;
 
-    private CharacterAnimator characterAnimator;
-    private CharacterController characterController;
+    private CharacterAnimator animator;
+    private CharacterController controller;
 
     private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
+        controller = GetComponent<CharacterController>();
         stacker = GetComponent<Stacker>();
-        characterAnimator = GetComponent<CharacterAnimator>();
+        animator = GetComponent<CharacterAnimator>();
     }
 
     void Update()
@@ -36,7 +36,7 @@ public class PlayerMovement : MonoBehaviour
 
         if(inputVector.magnitude > 0)
         {
-            characterController.Move(MovementSpeed * Time.deltaTime * inputVector);
+            controller.Move(MovementSpeed * Time.deltaTime * inputVector);
 
             Vector3 pos = transform.position;
             pos.y = 0;
@@ -45,11 +45,13 @@ public class PlayerMovement : MonoBehaviour
             Quaternion toRotation = Quaternion.LookRotation(inputVector, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, RotationSpeed * Time.deltaTime);
 
-            characterAnimator.Running();
+            animator.Running();
+            animator.NotMining();
         }
         else
         {
-            characterAnimator.Idling();
+            animator.NotRunning();
+            
         }
     }
 

@@ -26,13 +26,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2516911213780177997}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.08, y: 0.36, z: 0}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2922254409210476376}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2396411801800588177
 MonoBehaviour:
@@ -50,11 +50,6 @@ MonoBehaviour:
   hitsToSpawnBrick: 1
   currenthit: 0
   reservedBricks: 5
-  brickPrefab: {fileID: 7365849769138540029, guid: 4c4212a5147c6444e948bf57b88dfed6,
-    type: 3}
-  bomb: {fileID: 6999227988997299331, guid: b7b049b7c58c3d9458f16315b7a84f28, type: 3}
-  superJumpPrefab: {fileID: 8063915022723074157, guid: 36f9f74117f816e4589469c31ed50340,
-    type: 3}
 --- !u!135 &8512078595318533336
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -70,12 +65,12 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.7
-  m_Center: {x: 0, y: 0, z: 0.6}
+  m_Radius: 0.75
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6988758461186520577
 GameObject:
   m_ObjectHideFlags: 0
@@ -101,14 +96,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6988758461186520577}
-  m_LocalRotation: {x: 0.98102605, y: -0.12114564, z: -0.128185, w: 0.08050017}
-  m_LocalPosition: {x: 0.040745825, y: -0.032095302, z: 0.6018318}
-  m_LocalScale: {x: 0.33300677, y: 0.33300674, z: 0.33300677}
+  m_LocalRotation: {x: 0.98070735, y: -0.117638245, z: -0.11763825, w: 0.10264324}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6883162384595148062}
   m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 170, y: 15, z: 15}
 --- !u!33 &7897478180620207842
 MeshFilter:
   m_ObjectHideFlags: 0

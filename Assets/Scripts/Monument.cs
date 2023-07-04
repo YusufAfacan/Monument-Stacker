@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Monument : MonoBehaviour
 {
-    public List<GameObject> bricksToBeActivated;
+    public List<GameObject> partsToBeActivated;
     public int nextBrickIndex;
     private ObjectPooler pooler;
 
@@ -14,7 +14,7 @@ public class Monument : MonoBehaviour
 
         for (int i = 0; i < transform.childCount; i++)
         {
-            bricksToBeActivated.Add(transform.GetChild(i).gameObject);
+            partsToBeActivated.Add(transform.GetChild(i).gameObject);
             
             if (transform.GetChild(i).gameObject.activeSelf)
             {
@@ -30,13 +30,16 @@ public class Monument : MonoBehaviour
 
     public void ActivateBlock()
     {
-        bricksToBeActivated[nextBrickIndex].SetActive(true);
+        partsToBeActivated[nextBrickIndex].SetActive(true);
+        partsToBeActivated[nextBrickIndex].transform.DOShakePosition(0.5f, 0.5f);
+        partsToBeActivated[nextBrickIndex].transform.DOShakeRotation(0.5f, 0.5f);
+        partsToBeActivated[nextBrickIndex].transform.DOShakeScale(0.5f, 0.5f);
         nextBrickIndex++;
     }
 
     public void DeactivateBlock()
     {
-        bricksToBeActivated[nextBrickIndex-1].SetActive(false);
+        partsToBeActivated[nextBrickIndex-1].SetActive(false);
         nextBrickIndex--;
 
         GameObject spawnedBrick = pooler.SpawnFromPool("Brick", transform.position, Quaternion.identity);
